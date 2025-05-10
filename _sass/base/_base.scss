@@ -344,7 +344,8 @@ main {
 /* Overwrite bootstrap outline button */
 .btn.btn-outline-primary {
   &:not(.disabled):hover {
-    border-color: #007bff !important;
+    border-color: rgb(181, 186, 182) !important;
+    background-color: rgb(43, 44, 44, 0.342);
   }
 }
 
