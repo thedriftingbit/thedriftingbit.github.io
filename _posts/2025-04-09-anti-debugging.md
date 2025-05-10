@@ -16,15 +16,15 @@ This function is seen in Windows and is part of the operating system's API. The 
 
 The Process Environment Block (PEB) is a structure that exists for each process and contains data related to that process. In WinDbg, you can view a nicely-formatted version of the PEB with the command `!peb`.
 
-![the process environment block displayed in WinDbg](assets\img\anti-debugging\PEB_Format.jpg)
+![the process environment block displayed in WinDbg](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/PEB_Format.jpg)
 
 The third value down is the `BeingDebugged` flag, which we can see has been set to "Yes." Another way to view the PEB in WinDbg is by using the `dt _peb @$peb` command, which will display the information about a specified structure - in this case, the `_peb` structure located at the variable `$peb`. Structures like the PEB are extensively documented by Microsoft, so be sure to look up any that you may be unfamiliar with. [This](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb) is the link to the structure documentation for the PEB.
 
-![the process environment block structure](assets\img\anti-debugging\PEB1.jpg)
+![the process environment block structure](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/PEB1.jpg)
 
 Moreso than the `!peb` command, this `dt` command shows the actual values set for each of these flags. We can see that the `BeingDebugged` flag is set to 1. Once the IsDebuggerPresent() function sees this flag, it will call ExitProcess and our debugging attempt will be cut short. However, WinDbg allows you to edit the content of specific memory addresses - in our case, we will use the `eb $peb+0x2 0x0` command to set the byte value of the `BeingDebugged` flag to 0. This command targets the flag at location 2 in the PEB - in this case, `BeingDebugged`, and sets it to 0.
 
-![setting the Being Debugged flag to 0](assets\img\anti-debugging\PEB2.jpg)
+![setting the Being Debugged flag to 0](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/PEB2.jpg)
 
 ## The ICEBP Instruction
 
@@ -34,28 +34,28 @@ The `ICEBP` instruction is not recognized by x86 assembly, unlike common instruc
 
 First, we use the `lm` command to list the modules in the WinDbgDemo.exe executable:
 
-![listing modules in the executable](assets\img\anti-debugging\WinDBG_LM.jpg)
+![listing modules in the executable](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_LM.jpg)
 
 We can see that the WinDbgDemo module starts at memory location `00870000` and ends at `00876000`. This would be a great range to start our search, as it is reasonable to assume that this instruction lives within the code being executed in its namesake's module. To do this, we can search for a pattern over a range of memory addresses with the command `# [\?\?\?] 00870000 00876000`. The bracketed portion of that command is a regular expression searching for three question marks which have to be escaped using `\` since they can be used as regular expression syntax.
 
-![searching for the ??? instruction](assets\img\anti-debugging\WinDBG_SearchF1.jpg)
+![searching for the ??? instruction](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_SearchF1.jpg)
 
 Within the first few results, we see the `f1` value we are looking for at memory location `00871293` and can use the unassembly (`u`) command to see the assembly at that location with `u 00871293`.
 
-![checking the assembly instructions at memory location](assets\img\anti-debugging\WinDBG_Unassemble.jpg)
+![checking the assembly instructions at memory location](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_Unassemble.jpg)
 
 This is exactly what we were looking for! We can edit the `f1` portion of the code to something else to avoid this instruction. This is easily done in WinDbg within the Memory window:
 
-![memory window](assets\img\anti-debugging\WinDBG_MemoryPatch.jpg)
+![memory window](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_MemoryPatch.jpg)
 
 You can highlight the hex value shown and edit it as needed - in my case, I used `ff`:
 
-![memory window after patching](assets\img\anti-debugging\WinDBG_AfterPatch2.jpg)
+![memory window after patching](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_AfterPatch2.jpg)
 
 With the `BeingDebugged` flag set to 0 and the `ICEBP` instruction patched out, we can continue our traversal of this executable. The way this lab concludes is by showing the memory location of a deobfuscated string in the console once the appropriate anti-debugging measures are avoided:
 
-![memory location](assets\img\anti-debugging\WinDBG_DeobStringLocation.jpg)
+![memory location](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_DeobStringLocation.jpg)
 
 The only trick here is to not let the program run to completion - as part of the process termination, the string we are looking for will be wiped out! So, we can step out of a couple of functions after this memory location was printed and once again look at the location in the Memory window to find the deobfuscated string:
 
-![deobfuscated string at memory location](assets\img\anti-debugging\WinDBG_DeobString.jpg)
+![deobfuscated string at memory location](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/anti-debugging/WinDBG_DeobString.jpg)

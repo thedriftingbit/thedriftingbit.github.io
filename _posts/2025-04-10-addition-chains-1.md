@@ -7,9 +7,11 @@ math: true
 tags: [cryptography,cybersecurity,math]
 ---
 
+Many cryptographic protocols require that numbers be raised to very large powers. The computers that these protocols are implemented on must be able to calculate these powers quickly and efficiently. This is the first of a series of articles based off of an undergrad paper I wrote about addition chains in mathematics and their role in cryptography. 
+
 ## Addition Chains
 
-Many cryptographic protocols require that numbers be raised to very large powers. The computers that these protocols are implemented on must be able to calculate these powers quickly and efficiently. This is the first of a series of articles based off of an undergrad paper I wrote about addition chains in mathematics and their role in cryptography. This paper will begin with the basic mathematical method behind exponentiation on a computer - the addition chain. An $\textit{addition chain}$ for an integer $\textit{n}$ is a sequence of integers: 
+We will begin with the basic mathematical method behind exponentiation on a computer - the addition chain. An $\textit{addition chain}$ for an integer $\textit{n}$ is a sequence of integers: 
 
 $$
 1 = a_{0},a_{1},a_{2}, \dots ,a_{r}=n
@@ -62,7 +64,7 @@ $\textbf{Table 1}$: $\text{Decimal numbers from 0 through 10 and their binary re
 
 In **Table 1**, we have the decimal numbers $1$ through $10$, along with their binary representations. If we look at the binary representation for 0, we see 0000. These binary representations are determined by successive powers of $2$. The right-most binary digit stands for the value $2^0 = 1$, the next is $2^1 = 2$, the next is $2^2 = 4$, and so on. By placing a $1$ in one of these locations, we “turn on” that bit, meaning that the place of the bit is now active. We can add those numbers together to obtain the binary representation of a decimal number. For example, the binary representation of $6$ is $0110$, because we have a $1$ in the $2^1 = 2$ space and a 1 in the $2^2 = 4$ space. The sum of these two numbers is $6$.
 
-### Hamming weight
+### Hamming Weight
 
 The **Hamming weight** of a number is the number of non-zero elements from which the number is composed. In binary, this means the number of times a $1$ occurs in the binary number.
 

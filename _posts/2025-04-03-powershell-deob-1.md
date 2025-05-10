@@ -12,15 +12,15 @@ Malware authors will often attempt to hide the function of their code - one way 
 
 This lab begins with the dropper1.ps1 file. Opening it in the virtual machine's text editor, we can see that the obfuscated code is decimal-encoded.
 
-![decimal encoded values in a powershell script](assets\img\powershell-deob-1\Dropper1_Overview.jpg)
+![decimal encoded values in a powershell script](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_Overview.jpg)
 
 This snippet at the beginning of the code shows the usage of a dot sourcing operator - this is used to execute the proceeding script or command. But what script or command will it be executing?
 
-![](assets\img\powershell-deob-1\Dropper1_IEX.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_IEX.jpg)
 
 Let's break this command down.
 
-![](assets\img\powershell-deob-1\Dropper1_IEX2.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_IEX2.jpg)
 
 The core of this command is the `$verbosepreference` predefined variable. The default value of this variable is `SilentlyContinue`. We can see that this variable is being cast to a string with the `[string]` command, and then two of that resulting string's characters are being printed - 1 and 3. Remember that string arrays are zero-indexed, meaning that the first character would be the 0th index.
 
@@ -41,12 +41,12 @@ x
 
 Finally, these values are joined using the `-join''` operator, which removes the whitespace and concatenates the values into a single string - `iex`. This string is an alias for **Invoke-Expression** in PowerShell, which is a cmdlet that executes the proceeding string as a PowerShell command. In our case, that string will be whatever the obfuscated script decodes to.
 
-![](assets\img\powershell-deob-1\Dropper1_IEX2.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_IEX2.jpg)
 
 This is important to take note of because when you are analyzing malicious PowerShell code, Invoke-Expression is often used to "detonate" the script. By removing the dot operator and any tricky instances of Invoke-Expression, this detonation is prevented.
 
 Let's take a look at the end of the obfuscated script:
-![](assets\img\powershell-deob-1\Dropper1_End2.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_End2.jpg)
 
 Here, we see the following command:
 ``` powershell
@@ -58,7 +58,7 @@ The virtual machine running the lab has a local version of CyberChef installed. 
 
 Since we have previously identified the method the PowerShell code uses to decode its dropper, we can place just the obfuscated portion of the script into CyberChef and select the 'From Decimal' recipe, making sure to select the comma delimiter. From there, CyberChef does the rest.
 
-![cyber chef input and output](assets\img\powershell-deob-1\Dropper1_CyberChef.jpg)
+![cyber chef input and output](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_CyberChef.jpg)
 
 We can save this as stage2.ps1 and move on to analyze it further.
 
@@ -66,10 +66,10 @@ We can save this as stage2.ps1 and move on to analyze it further.
 
 The second stage of this obfuscated code looks somewhat like the first. Note the lack of any Invoke-Expression at the beginning!
 
-![decimal encoded values in a powershell script](assets\img\powershell-deob-1\Stage2_Overview.jpg)
+![decimal encoded values in a powershell script](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage2_Overview.jpg)
 There appear to be decimal values with ASCII characters interspersed. Let's check out the bottom of this code and see if there are any operations happening.
 
-![](assets\img\powershell-deob-1\Stage2-End.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage2-End.jpg)
 We can see a string of commands separated by pipes, so we know that there are some operations being used as input and output here. Once again, we can break this command down into pieces to better understand it.
 
 This is the first command:
@@ -90,25 +90,25 @@ The final command is:
 ```
 This should look familiar! Similar to Stage 1, this is a sneaky way of executing the preceding code using Invoke-Expression. However, instead of using the `$verbosepreference` variable, this time the code is using the `$shellid` built-in variable. This variable will always return `Microsoft.PowerShell`. As a result, the first and thirteenth index will be 'i' and 'e' respectively, meaning that this command will use a dot operator to call Invoke-Expression.
 
-![](assets\img\powershell-deob-1\Stage2_IEX2.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage2_IEX2.jpg)
 
 Now that we know how the obfuscated code is being decoded, we can return to CyberChef. First, we must split the obfuscated code according to the string we found. This can be done with the Find/Replace recipe set to Regular Expression mode. The string `[WT:;CY}!Jd]` will match each of the characters inside the brackets, and in my case I replaced them with a space.
 
-![cyber chef input and output](assets\img\powershell-deob-1\Stage2_CyberChef.jpg)
+![cyber chef input and output](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage2_CyberChef.jpg)
 
 With that finished, we use the 'From Decimal' recipe as before on our new input to find the code for Stage 3:
 
-![cyber chef input and output](assets\img\powershell-deob-1\Stage2_to_Stage3.jpg)
+![cyber chef input and output](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage2_to_Stage3.jpg)
 
 ## Stage 3
 
 This code looks similar to the previous two stages. The beginning code will do the character conversion of the decimal values ahead of time.
 
-![decimal encoded values in a powershell script](assets\img\powershell-deob-1\Stage3_Overview.jpg)
+![decimal encoded values in a powershell script](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage3_Overview.jpg)
 
 The obfuscated code is still being decimal-encoded, but the PowerShell code at the end is a little different from what we have seen previously:
 
-![](assets\img\powershell-deob-1\Stage3_End.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage3_End.jpg)
 
 Once again, we see the pipe operator and a couple commands. The first is: 
 ```powershell
@@ -124,16 +124,16 @@ This command looks similar to some of the others we have seen - it is pulling ou
 
 We can investigate this further on our personal machine:
 
-![](assets\img\powershell-deob-1\Stage3_MDR.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage3_MDR.jpg)
 
 The MaximumDriveCount variable refers to the number of drives that can be handled or defined in a given session. My understanding is that this variable would not be set in a lab's virtual machine environment, which is why it does not exist. However, we can see what the rest of the command would do if that variable did exist:
 
-![](assets\img\powershell-deob-1\Stage3_MDR2.jpg)
+![](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage3_MDR2.jpg)
 
 Again, we see the `iex` cmdlet being called in a sneaky way. In the case of the lab's virtual machine, however, this value would not execute because the MaximumDriveCount variable does not exist. Attempting to execute the code shown would throw a "Cannot index into a null array" error.
 
 Now that we understand the operations being performed on the obfuscated code, we can return to CyberChef and use the 'From Decimal' and 'XOR' recipes to deobfuscate.
 
-![cyber chef input and output with the lab's solution](assets\img\powershell-deob-1\Stage4_Solution.jpg)
+![cyber chef input and output with the lab's solution](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Stage4_Solution.jpg)
 
 This returns the plaintext code that contains the flag for this lab.
