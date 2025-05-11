@@ -28,7 +28,8 @@ url: "https://thedriftingbit.github.io"
 github:
   username: thedriftingbit # change to your GitHub username
 
-name: The Drifting Bit
+plugins:
+  - jekyll-feed
 
 
 #twitter:
