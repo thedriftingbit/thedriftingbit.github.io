@@ -10,7 +10,7 @@ Malware authors will often attempt to hide the function of their code - one way 
 
 ## Stage 1
 
-This lab begins with the dropper1.ps1 file. Opening it in the virtual machine's text editor, we can see that the obfuscated code is decimal-encoded.
+This lab begins with the dropper.ps1 file. Opening it in the virtual machine's text editor, we can see that the obfuscated code is decimal-encoded.
 
 ![decimal encoded values in a powershell script](https://raw.githubusercontent.com/thedriftingbit/thedriftingbit.github.io/refs/heads/main/assets/img/powershell-deob-1/Dropper1_Overview.jpg)
 
